@@ -68,6 +68,7 @@ public class MainActivity extends Activity {
         web.requestFocus();
 
         registerReceiver(screenReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+        WakeService.start(this);
         web.loadUrl("file:///android_asset/www/index.html");
     }
 

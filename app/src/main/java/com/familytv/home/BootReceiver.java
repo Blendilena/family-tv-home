@@ -9,8 +9,7 @@ public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (!Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) return;
-        Intent i = new Intent(context, MainActivity.class);
-        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        try { context.startActivity(i); } catch (Exception ignored) { }
+        WakeService.start(context);
+        WakeService.openHome(context);
     }
 }
