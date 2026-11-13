@@ -22,7 +22,9 @@ window.FTV_CONFIG = {
   },
 
   // Kids home
-  kidsFeatured: { title: 'Deal or No Deal', badge: 'Family favourite', cta: 'Watch on 10 Play', app: 'tenplay' },
+  // url: tried first so 10 Play opens the show itself; tmdbTv: the show's TMDB id for its background artwork.
+  kidsFeatured: { title: 'Deal or No Deal', badge: 'Family favourite', cta: 'Watch on 10 Play', app: 'tenplay',
+                  url: 'https://10play.com.au/deal-or-no-deal', tmdbTv: 2176 },
   kidsSide: [
     { app: 'youtube', title: 'YouTube', note: 'Pick your own account', icon: 'play', bg: '#FF6B5B' },
     { app: 'netflix', title: 'Netflix', note: 'Choose your Kids profile', icon: 'star', bg: '#1F2240' }

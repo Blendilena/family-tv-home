@@ -138,6 +138,7 @@ public class Bridge {
         if (url == null || !url.startsWith("https://")) return false;
         Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         if (pkg != null && !pkg.isEmpty()) i.setPackage(pkg);
+        if (i.resolveActivity(act.getPackageManager()) == null) return false;
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         start(i);
         return true;

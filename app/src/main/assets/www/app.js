@@ -59,6 +59,13 @@
     }
     return S.icons[pkg];
   }
+  // Opens the featured show itself when the app accepts links, otherwise just the app.
+  function openFeatured() {
+    var f = C.kidsFeatured, pkg = resolve(f.app);
+    if (!pkg) { toast(f.cta.replace('Watch on ', '') + ' isn\u2019t installed yet. Ask a grown-up.'); return; }
+    if (f.url && A.openUrl(f.url, pkg)) return;
+    A.launch(pkg);
+  }
   function openApp(id, label) {
     var pkg = resolve(id);
     if (!pkg) { toast((label || (C.apps[id] && C.apps[id].name) || 'That app') + ' isn’t installed yet. Ask a grown-up.'); return; }
@@ -191,7 +198,8 @@
         '<span><span class="kside-title" style="display:block">' + esc(s.title) + '</span><span class="kside-note">' + esc(s.note) + '</span></span></button>';
     }).join('');
     $('kids-hero').innerHTML =
-      '<button class="kfeat kfocus' + (resolve(f.app) ? '' : ' missing') + '" data-nav data-app="' + f.app + '" aria-label="' + esc(f.title + ', ' + f.cta) + '">' +
+      '<button class="kfeat kfocus' + (resolve(f.app) ? '' : ' missing') + '" id="kfeat" data-nav data-action="featured" aria-label="' + esc(f.title + ', ' + f.cta) + '">' +
+      '<span class="kfeat-bg" id="kfeat-bg"></span><span class="kfeat-shade" aria-hidden="true"></span>' +
       '<span class="boxes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>' +
       '<span class="kbadge">' + esc(f.badge) + '</span><span class="kfeat-title">' + esc(f.title) + '</span>' +
       '<span class="kfeat-cta"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#1F2240"/><path d="M10 8l6 4-6 4z" fill="#FFFFFF"/></svg>' + esc(f.cta) + '</span></button>' +
@@ -206,6 +214,16 @@
       return '<button class="ktile kgame kfocus' + (pkg ? '' : ' missing') + '" data-nav data-app="' + a.app + '" data-label="' + esc(a.name) + '" style="background:' + a.bg + ';color:' + a.fg + '">' +
         '<span class="kicon">' + iconImg(pkg) + '</span><span class="ktile-name">' + esc(a.name) + '</span></button>';
     }).join('');
+    if (f.tmdbTv && A.hasTmdbKey()) {
+      tmdb('tv/' + f.tmdbTv + '?language=en-AU').then(function (d) {
+        var path = d && (d.backdrop_path || d.poster_path);
+        if (!path) return;
+        var bg = $('kfeat-bg'); if (!bg) return;
+        var im = new Image();
+        im.onload = function () { bg.style.backgroundImage = 'url(' + im.src + ')'; bg.classList.add('on'); $('kfeat').classList.add('has-art'); };
+        im.src = IMG + 'w1280' + path;
+      });
+    }
     fillKidsRow('kids-movies', 'movie', KIDM);
     fillKidsRow('kids-series', 'tv', KIDT);
   }
@@ -449,6 +467,7 @@
     if (it && items[it]) return openDetail(items[it]);
     switch (act) {
       case 'kids': return chooseKids();
+      case 'featured': return openFeatured();
       case 'parents': return askPin(function () { S.tab = 'home'; renderParents(); show('parents'); });
       case 'grownups': return askPin(function () { S.tab = 'home'; renderParents(); show('parents'); });
       case 'switch': return show('picker');
