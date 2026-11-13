@@ -129,10 +129,11 @@
     closeOverlay(true);
     setTimeout(function () { focusFirst(); }, 30);
   }
-  function openOverlay(name) { S.overlay = name; $(name).classList.add('active'); setTimeout(focusFirst, 30); }
+  function openOverlay(name) { S.overlay = name; $(name).classList.add('active'); setTimeout(focusFirst, 30); if (S.hero) heroSchedule(); }
   function closeOverlay(silent) {
     if (!S.overlay) return;
     $(S.overlay).classList.remove('active'); S.overlay = null;
+    if (S.hero) setTimeout(heroSchedule, 40);
     if (!silent && S.returnFocus && document.body.contains(S.returnFocus)) focusEl(S.returnFocus);
   }
   function root() { return S.overlay ? $(S.overlay) : $(S.screen); }
@@ -256,11 +257,12 @@
     var foot = '<p class="pfoot">This product uses the TMDB API but is not endorsed or certified by TMDB. Streaming availability data by JustWatch, via TMDB. Popularity is TMDB’s, not Netflix’s or Prime’s own charts.</p>';
     var html = '';
     if (S.tab === 'home') {
-      html = '<div class="phero" id="phero"><div class="phero-img skeleton" id="phero-img"></div><div class="phero-scrim"></div><div class="phero-body" id="phero-body"></div></div>' +
+      html = '<div class="phero" id="phero"><div class="phero-layer skeleton show" id="phero-a"></div><div class="phero-layer" id="phero-b"></div>' +
+        '<div class="phero-scrim"></div><div class="phero-body" id="phero-body"></div><div class="phero-dots" id="phero-dots" aria-hidden="true"></div></div>' +
         (noKey ? keyInfo : '') +
-        sec('top', 'Popular this week', 'Netflix and Prime Video · Australia') +
         sec('newm', 'New movies', 'Recently released on Netflix and Prime') +
         sec('newt', 'New series', 'Recently started') +
+        sec('topm', 'Top rated movies', 'Highest rated on Netflix and Prime') +
         appsSec('Live TV', C.liveTv) + appsSec('Your apps', C.parentsApps) + foot;
     } else if (S.tab === 'movies') {
       html = (noKey ? keyInfo : '') + sec('nfm', 'Popular on Netflix', 'Movies') + sec('pvm', 'Popular on Prime Video', 'Movies') +
@@ -281,12 +283,8 @@
       return;
     }
     if (S.tab === 'home') {
-      Promise.all([list('movie', 'netflix', POP, 5), list('movie', 'prime', POP, 5)]).then(function (r) {
-        var top = mix(r[0], r[1], 10);
-        top.forEach(function (it, i) { it._rank = i + 1; });
-        fillRow('top', top, true);
-        if (top[0]) setHero(top[0], true);
-      });
+      loadHero();
+      Promise.all([list('movie', 'netflix', TOPM, 10), list('movie', 'prime', TOPM, 10)]).then(function (r) { fillRow('topm', mix(r[0], r[1], 16)); });
       Promise.all([list('movie', 'netflix', NEWM(), 10), list('movie', 'prime', NEWM(), 10)]).then(function (r) { fillRow('newm', mix(r[0], r[1], 16), false, true); });
       Promise.all([list('tv', 'netflix', NEWT(), 10), list('tv', 'prime', NEWT(), 10)]).then(function (r) { fillRow('newt', mix(r[0], r[1], 16), false, true); });
     } else if (S.tab === 'movies') {
@@ -335,20 +333,108 @@
     return '<section class="psec"><div class="psec-head"><h2>' + esc(h) + '</h2><span>' + pkgs.length + ' apps</span></div><div class="pgrid">' + pkgs.map(appTile).join('') + '</div></section>' +
       '<section class="psec"><button class="pbtn" data-nav data-action="fire-settings">Open Fire TV settings</button></section>';
   }
-  function setHero(it, first) {
-    var body = $('phero-body'), img = $('phero-img');
-    if (!body || !img) return;
-    img.classList.remove('skeleton');
-    img.style.backgroundImage = it.backdrop_path ? 'url(' + IMG + 'w1280' + it.backdrop_path + ')' : '';
+  function enterParents() { S.tab = 'home'; S.userMoved = false; renderParents(); show('parents'); }
+
+  // ---------------------------------------------------------------- top 5 carousel
+  var HERO_MS = 8000;
+  // The 5 most popular titles across Netflix and Prime Video in Australia (TMDB popularity).
+  function top5(kind) {
+    return Promise.all([list(kind, 'netflix', POP, 10), list(kind, 'prime', POP, 10)]).then(function (r) {
+      var seen = {}, all = r[0].concat(r[1]).filter(function (it) {
+        if (!it.backdrop_path || seen[it.id]) return false; seen[it.id] = true; return true;
+      });
+      all.sort(function (a, b) { return (b.popularity || 0) - (a.popularity || 0); });
+      return all.slice(0, 5).map(function (it, i) { it._rank = i + 1; return it; });
+    });
+  }
+  function loadHero() {
+    var H = { items: [], i: -1, flip: false, timer: 0, busy: false };
+    S.hero = H;
+    Promise.all([top5('movie'), top5('tv')]).then(function (r) {
+      if (S.hero !== H) return;
+      H.items = r[0].concat(r[1]);
+      if (!H.items.length) { var ph = $('phero'); if (ph) ph.style.display = 'none'; return; }
+      // warm the cache so every slide change is instant
+      H.items.forEach(function (it) { var im = new Image(); im.src = IMG + 'w1280' + it.backdrop_path; });
+      showSlide(0, 1, true);
+    });
+  }
+  function heroAlive(H) { return S.hero === H && $('phero') && S.screen === 'parents' && S.tab === 'home'; }
+  function heroPaused() {
+    var a = document.activeElement;
+    return !!(S.overlay || (a && a.closest && a.closest('.phero')));
+  }
+  function showSlide(n, dir, first) {
+    var H = S.hero;
+    if (!H || !H.items.length || H.busy) return;
+    n = (n + H.items.length) % H.items.length;
+    var it = H.items[n], url = IMG + 'w1280' + it.backdrop_path;
+    var hadFocus = document.activeElement && document.activeElement.closest && document.activeElement.closest('.phero');
+    var focusPrimary = hadFocus && document.activeElement.classList.contains('primary');
+    H.busy = true;
+    var im = new Image();
+    im.onload = im.onerror = function () {
+      if (!heroAlive(H)) { H.busy = false; return; }
+      var a = $('phero-a'), b = $('phero-b');
+      var incoming = H.flip ? a : b, outgoing = H.flip ? b : a;
+      H.flip = !H.flip;
+      incoming.classList.remove('skeleton', 'show');
+      incoming.style.backgroundImage = 'url(' + url + ')';
+      incoming.style.zIndex = 1; outgoing.style.zIndex = 0;
+      void incoming.offsetWidth;                         // restart the zoom for this slide
+      incoming.classList.add('show');
+      outgoing.classList.remove('show');
+      var body = $('phero-body');
+      body.classList.remove('in-r', 'in-l');
+      body.classList.add('out');
+      setTimeout(function () {
+        if (!heroAlive(H)) { H.busy = false; return; }
+        H.i = n;
+        heroText(it);
+        body.classList.remove('out');
+        void body.offsetWidth;
+        body.classList.add(dir < 0 ? 'in-l' : 'in-r');
+        heroDots();
+        if (hadFocus) focusEl(root().querySelector(focusPrimary ? '.phero .pbtn.primary' : '.phero .pbtn:not(.primary)'));
+        else if (first && !S.overlay && !S.userMoved) focusEl(root().querySelector('.phero .pbtn.primary'));
+        H.busy = false;
+        heroSchedule();
+      }, first ? 0 : 260);
+    };
+    im.src = url;
+  }
+  function heroText(it) {
     var svc = it._service === 'prime' ? 'Prime Video' : 'Netflix';
-    var meta = [year(it), it.vote_average ? '★ ' + it.vote_average.toFixed(1) : '', it._kind === 'tv' ? 'Series' : 'Movie'].filter(Boolean).join(' · ');
+    var tv = it._kind === 'tv';
+    var meta = [year(it), it.vote_average ? '★ ' + it.vote_average.toFixed(1) : '', tv ? 'Series' : 'Movie', svc].filter(Boolean).join(' · ');
     var k = store(it);
-    body.innerHTML = '<span class="phero-kicker">' + (it._rank ? '<b>#' + it._rank + '</b>' : '') + 'Popular on ' + svc + ' in Australia</span>' +
+    $('phero-body').innerHTML =
+      '<span class="phero-kicker"><b>#' + it._rank + '</b>Top ' + (tv ? 'series' : 'movie') + ' in Australia</span>' +
       '<span class="phero-title">' + esc(title(it)) + '</span><span class="phero-meta">' + esc(meta) + '</span>' +
       '<span class="phero-ov">' + esc(it.overview) + '</span>' +
       '<div class="pbtns"><button class="pbtn primary" data-nav data-open="' + k + '"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4l13 8-13 8z" fill="#0E1116"/></svg>Open in ' + svc + '</button>' +
       '<button class="pbtn" data-nav data-item="' + k + '">More info</button></div>';
-    if (first && S.screen === 'parents' && !S.overlay) setTimeout(function () { if (!document.activeElement || document.activeElement === document.body) focusFirst(); }, 50);
+  }
+  function heroDots() {
+    var H = S.hero, el = $('phero-dots');
+    if (!el || !H) return;
+    var html = '';
+    H.items.forEach(function (it, i) {
+      if (i === 0 || it._kind !== H.items[i - 1]._kind) html += '<span class="pdot-label">' + (it._kind === 'tv' ? 'Series' : 'Movies') + '</span>';
+      html += '<i class="pdot' + (i === H.i ? ' on' : '') + '"><b style="animation-duration:' + HERO_MS + 'ms"></b></i>';
+    });
+    html += '<span class="pdot-hint">◀ ▶</span>';
+    el.innerHTML = html;
+  }
+  function heroSchedule() {
+    var H = S.hero;
+    if (!H) return;
+    clearTimeout(H.timer);
+    var paused = heroPaused();
+    var ph = $('phero');
+    if (ph) ph.classList.toggle('paused', paused);
+    if (paused || !heroAlive(H)) return;
+    H.timer = setTimeout(function () { if (heroAlive(H) && !heroPaused()) showSlide(H.i + 1, 1); }, HERO_MS);
   }
 
   // ---------------------------------------------------------------- detail + settings
@@ -394,7 +480,11 @@
     var list = focusables();
     var r = root();
     var prefer = r.querySelector('.pbtn.primary[data-nav], .kfeat[data-nav], .pick-kids, .pin-key, .set-item') || list[0];
-    if (S.screen === 'parents' && !S.overlay) prefer = r.querySelector('.pbtns .pbtn.primary') || r.querySelector('.pcard[data-nav], .papp[data-nav]') || r.querySelector('.ptab.on');
+    if (S.screen === 'parents' && !S.overlay) {
+      var heroComing = S.tab === 'home' && $('phero') && $('phero').style.display !== 'none';
+      prefer = r.querySelector('.pbtns .pbtn.primary') || (heroComing ? r.querySelector('.ptab.on') : null) ||
+        r.querySelector('.pcard[data-nav], .papp[data-nav]') || r.querySelector('.ptab.on');
+    }
     if (prefer) focusEl(prefer);
   }
   function focusEl(el) {
@@ -417,11 +507,7 @@
       var want = atTop ? 0 : top - (S.screen === 'parents' ? 140 : 60);
       vs.scrollTo({ top: Math.max(0, want), behavior: 'smooth' });
     }
-    var k = el.getAttribute('data-item');
-    if (k && S.screen === 'parents' && S.tab === 'home' && !S.overlay && items[k]) {
-      clearTimeout(S.heroTimer);
-      S.heroTimer = setTimeout(function () { setHero(items[k]); }, 350);
-    }
+    if (S.hero && S.screen === 'parents') heroSchedule();
   }
   function rowKey(row) { return row.id || row.getAttribute('data-row') || row.className; }
   function move(dir) {
@@ -432,6 +518,7 @@
     list.forEach(function (el) {
       if (el === cur) return;
       var e = rect(el), main, cross;
+      if ((dir === 'left' || dir === 'right') && (e.b <= r.t + 4 || e.t >= r.b - 4)) return;   // stay on the same line
       if (dir === 'left') { if (e.cx >= r.cx - 4 || e.r > r.l + 8) return; main = r.l - e.r; cross = Math.abs(e.cy - r.cy); }
       if (dir === 'right') { if (e.cx <= r.cx + 4 || e.l < r.r - 8) return; main = e.l - r.r; cross = Math.abs(e.cy - r.cy); }
       if (dir === 'up') { if (e.cy >= r.cy - 4 || e.b > r.t + 8) return; main = r.t - e.b; cross = Math.abs(e.cx - r.cx); }
@@ -439,7 +526,10 @@
       var score = Math.max(0, main) + cross * (dir === 'left' || dir === 'right' ? 3 : 0.6);
       if (score < bestScore) { bestScore = score; best = el; }
     });
-    if (!best) return;
+    if (!best) {
+      if ((dir === 'left' || dir === 'right') && cur.closest('.phero') && S.hero && S.hero.items.length) showSlide(S.hero.i + (dir === 'right' ? 1 : -1), dir === 'right' ? 1 : -1);
+      return;
+    }
     if (dir === 'up' || dir === 'down') {
       var row = rowOf(best);
       if (row && row !== curRow) {
@@ -468,8 +558,8 @@
     switch (act) {
       case 'kids': return chooseKids();
       case 'featured': return openFeatured();
-      case 'parents': return askPin(function () { S.tab = 'home'; renderParents(); show('parents'); });
-      case 'grownups': return askPin(function () { S.tab = 'home'; renderParents(); show('parents'); });
+      case 'parents': return askPin(enterParents);
+      case 'grownups': return askPin(enterParents);
       case 'switch': return show('picker');
       case 'settings': return openSettings();
       case 'close': return closeOverlay();
@@ -498,7 +588,7 @@
   document.addEventListener('keydown', function (e) {
     var k = e.key;
     var map = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down' };
-    if (map[k]) { e.preventDefault(); move(map[k]); return; }
+    if (map[k]) { e.preventDefault(); S.userMoved = true; move(map[k]); return; }
     if (k === 'Enter' || k === ' ') { e.preventDefault(); activate(document.activeElement); return; }
     if (k === 'Escape' || k === 'Backspace' || k === 'GoBack' || k === 'BrowserBack') { e.preventDefault(); app.back(); }
   });

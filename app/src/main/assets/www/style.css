@@ -156,10 +156,30 @@ h1, h2, h3, p { margin: 0; }
 .pswitch { display: flex; align-items: center; gap: 10px; padding: 10px 20px; border-radius: 999px; background: #1B2029; box-shadow: inset 0 0 0 2px #2C3340; font-size: 20px; color: #C9D0DB; }
 .pswitch:focus { background: #E8B04B; color: #0E1116; box-shadow: none; }
 .pbody { padding: 130px 80px 60px; }
-.phero { position: relative; height: 470px; border-radius: 28px; overflow: hidden; background: #171B22; margin-bottom: 40px; }
-.phero-img { position: absolute; inset: 0; background-size: cover; background-position: center top; transition: opacity .5s ease; }
+.phero { position: relative; height: 500px; border-radius: 28px; overflow: hidden; background: #171B22; margin-bottom: 40px; }
+.phero-layer { position: absolute; inset: 0; background-size: cover; background-position: center 20%; opacity: 0; transform: scale(1.12); transition: opacity 1.1s ease, transform 9s cubic-bezier(.25,.1,.25,1); will-change: opacity, transform; }
+.phero-layer.show { opacity: 1; transform: scale(1); }
 .phero-scrim { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(14,17,22,.97) 0%, rgba(14,17,22,.78) 42%, rgba(14,17,22,0) 78%), linear-gradient(0deg, rgba(14,17,22,.7) 0%, rgba(14,17,22,0) 40%); }
-.phero-body { position: relative; height: 100%; padding: 56px 64px; display: flex; flex-direction: column; justify-content: flex-end; gap: 16px; max-width: 980px; }
+.phero-scrim, .phero-body, .phero-dots { z-index: 2; }
+.phero-body { position: relative; height: 100%; padding: 56px 64px 80px; display: flex; flex-direction: column; justify-content: flex-end; gap: 16px; max-width: 980px; }
+@keyframes heroInR { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: none; } }
+@keyframes heroInL { from { opacity: 0; transform: translateX(-60px); } to { opacity: 1; transform: none; } }
+.phero-body > * { will-change: opacity, transform; }
+.phero-body.out > * { opacity: 0; transform: translateX(-24px); transition: opacity .24s ease, transform .24s ease; }
+.phero-body.in-r > * { animation: heroInR .75s cubic-bezier(.16,1,.3,1) both; }
+.phero-body.in-l > * { animation: heroInL .75s cubic-bezier(.16,1,.3,1) both; }
+.phero-body > *:nth-child(2) { animation-delay: .06s; } .phero-body > *:nth-child(3) { animation-delay: .12s; }
+.phero-body > *:nth-child(4) { animation-delay: .18s; } .phero-body > *:nth-child(5) { animation-delay: .24s; }
+.phero-dots { position: absolute; left: 64px; bottom: 30px; display: flex; align-items: center; gap: 10px; }
+.pdot { position: relative; width: 14px; height: 8px; border-radius: 99px; background: rgba(242,244,248,.35); overflow: hidden; transition: width .5s cubic-bezier(.16,1,.3,1), background .3s; }
+.pdot.on { width: 64px; background: rgba(242,244,248,.25); }
+.pdot b { position: absolute; inset: 0; background: #E8B04B; transform-origin: 0 50%; transform: scaleX(0); }
+.pdot.on b { animation: heroFill linear forwards; }
+.phero.paused .pdot.on b { animation-play-state: paused; }
+@keyframes heroFill { to { transform: scaleX(1); } }
+.pdot-label { font-size: 16px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #C9D0DB; margin: 0 4px 0 14px; }
+.pdot-label:first-child { margin-left: 0; }
+.pdot-hint { margin-left: 18px; font-size: 16px; color: #9AA3B2; }
 .phero-kicker { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 600; color: #E8B04B; letter-spacing: 1.5px; text-transform: uppercase; }
 .phero-kicker b { background: #E8B04B; color: #0E1116; padding: 4px 12px; border-radius: 8px; letter-spacing: 0; }
 .phero-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 72px; line-height: 1; letter-spacing: -1px; }
