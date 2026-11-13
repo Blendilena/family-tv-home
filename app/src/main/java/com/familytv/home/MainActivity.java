@@ -78,12 +78,16 @@ public class MainActivity extends Activity {
     protected void onPause() {
         super.onPause();
         pausedAt = SystemClock.elapsedRealtime();
+        WakeService.inFront = false;
+        WakeService.lastPausedAt = pausedAt;
         if (bridge != null) bridge.stopSpeech();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        WakeService.inFront = true;
+        WakeService.start(this);
         boolean relock = screenWasOff
                 || (pausedAt > 0 && SystemClock.elapsedRealtime() - pausedAt > RELOCK_AFTER_MS);
         screenWasOff = false;

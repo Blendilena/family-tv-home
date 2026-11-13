@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.SystemClock;
 
 /**
  * Keeps a small listener alive so Family TV ("Who's watching?") comes back every time the TV
@@ -24,16 +25,34 @@ public class WakeService extends Service {
     private static final String CHANNEL = "familytv_wake";
     private final Handler handler = new Handler(Looper.getMainLooper());
 
+    /** Kept up to date by MainActivity so we know whether Family TV was on screen. */
+    static volatile boolean inFront = false;
+    static volatile long lastPausedAt = 0;
+    private boolean dreamFromHome = false;
+
     private final BroadcastReceiver screenOn = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (!Intent.ACTION_SCREEN_ON.equals(intent.getAction())) return;
-            // Give Fire TV a moment to finish waking before coming to the front.
+            String a = intent.getAction();
+            if (Intent.ACTION_DREAMING_STARTED.equals(a)) {
+                // Screensaver starting: remember whether it covered Family TV.
+                dreamFromHome = inFront || SystemClock.elapsedRealtime() - lastPausedAt < 4000;
+                return;
+            }
+            long delay;
+            if (Intent.ACTION_SCREEN_ON.equals(a)) {
+                delay = 1500;            // TV woke up: always come back to Who's watching?
+            } else if (Intent.ACTION_DREAMING_STOPPED.equals(a)) {
+                if (!dreamFromHome) return;   // screensaver was over another app (e.g. Netflix): leave it
+                delay = 700;             // screensaver ended over Family TV: make sure we're back on top
+            } else {
+                return;
+            }
             handler.removeCallbacksAndMessages(null);
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() { openHome(WakeService.this); }
-            }, 1500);
+            }, delay);
         }
     };
 
@@ -68,7 +87,10 @@ public class WakeService extends Service {
                 .build();
         if (Build.VERSION.SDK_INT >= 34) startForeground(1, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
         else startForeground(1, n);
-        registerReceiver(screenOn, new IntentFilter(Intent.ACTION_SCREEN_ON));
+        IntentFilter f = new IntentFilter(Intent.ACTION_SCREEN_ON);
+        f.addAction(Intent.ACTION_DREAMING_STARTED);
+        f.addAction(Intent.ACTION_DREAMING_STOPPED);
+        registerReceiver(screenOn, f);
     }
 
     @Override
