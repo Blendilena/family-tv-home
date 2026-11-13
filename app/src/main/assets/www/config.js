@@ -42,7 +42,8 @@ window.FTV_CONFIG = {
     { app: 'mathfun', name: 'Math Fun',   bg: '#19B5A5', fg: '#1F2240' }
   ],
 
-  // Parents home
+  // Parents home. Set parentsPin to true to ask for the 4-digit PIN again.
+  parentsPin: false,
   liveTv: ['sevenplus', 'ninenow', 'tenplay', 'sbs', 'iview', 'siptv'],
   parentsApps: ['netflix', 'prime', 'youtube', 'disney', 'hbo', 'twitch', 'tvbro'],
 

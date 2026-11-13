@@ -140,7 +140,8 @@
 
   // ---------------------------------------------------------------- picker + PIN
   function chooseKids() { renderKids(); show('kids'); }
-  function askPin(after) {
+  function askPin(after, force) {
+    if (!C.parentsPin && !force) { after(); return; }
     S.after = after; S.pinBuf = '';
     S.pinMode = A.hasPin() ? 'enter' : 'create1';
     renderPin(); show('pin');
@@ -453,12 +454,12 @@
   function openSettings() {
     S.returnFocus = document.activeElement;
     var items = [
-      ['pin', 'Change parents PIN', ''],
+      C.parentsPin ? ['pin', 'Change parents PIN', ''] : null,
       ['refresh', 'Refresh movies and series', ''],
       ['fire-settings', 'Fire TV settings', ''],
       ['close', 'Close', '']
     ];
-    $('set-list').innerHTML = items.map(function (i) { return '<button class="set-item" data-nav data-action="' + i[0] + '"><span>' + i[1] + '</span><span>' + i[2] + '</span></button>'; }).join('');
+    $('set-list').innerHTML = items.filter(Boolean).map(function (i) { return '<button class="set-item" data-nav data-action="' + i[0] + '"><span>' + i[1] + '</span><span>' + i[2] + '</span></button>'; }).join('');
     $('set-about').innerHTML = 'Family TV ' + esc(A.getVersion()) + ' · TMDB key: ' + (A.hasTmdbKey() ? 'added' : 'missing (run firetv.ps1 homeapp-key on the PC)') +
       '<br>This product uses the TMDB API but is not endorsed or certified by TMDB.';
     openOverlay('settings');
@@ -618,6 +619,11 @@
   }
 
   // ---------------------------------------------------------------- start
+  if (!C.parentsPin) {
+    var pp = document.querySelector('.pick-parents');
+    pp.setAttribute('aria-label', 'Parents');
+    pp.querySelector('.pick-sub').textContent = 'Movies, series and live TV';
+  }
   window.addEventListener('resize', fit);
   fit();
   loadApps();
