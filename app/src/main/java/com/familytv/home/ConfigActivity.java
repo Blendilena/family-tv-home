@@ -17,7 +17,17 @@ public class ConfigActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Intent in = getIntent();
+        handle(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        // A second "am start" can be delivered here instead of creating a new instance.
+        super.onNewIntent(intent);
+        handle(intent);
+    }
+
+    private void handle(Intent in) {
         SharedPreferences.Editor e = getSharedPreferences(Bridge.PREFS, Context.MODE_PRIVATE).edit();
         StringBuilder msg = new StringBuilder();
         String key = in.getStringExtra("tmdb_key");
@@ -36,7 +46,9 @@ public class ConfigActivity extends Activity {
         }
         e.apply();
         if (msg.length() > 0) Toast.makeText(this, msg.toString().trim(), Toast.LENGTH_LONG).show();
-        startActivity(new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        Intent home = new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (kids != null) home.putExtra("reload", true);
+        startActivity(home);
         finish();
     }
 }

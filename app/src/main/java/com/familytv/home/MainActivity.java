@@ -75,6 +75,12 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (intent.getBooleanExtra("reload", false)) js("window.app && app.onWake(true)");
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         pausedAt = SystemClock.elapsedRealtime();

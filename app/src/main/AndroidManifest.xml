@@ -50,6 +50,9 @@
              only adb's shell can start it; other apps on the TV cannot. -->
         <activity
             android:name=".ConfigActivity"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:taskAffinity=""
             android:exported="true"
             android:permission="android.permission.DUMP"
             android:theme="@android:style/Theme.NoDisplay" />
