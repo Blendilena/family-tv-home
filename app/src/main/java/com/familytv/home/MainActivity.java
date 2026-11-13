@@ -23,6 +23,7 @@ public class MainActivity extends Activity {
     private static final long RELOCK_AFTER_MS = 20 * 60 * 1000L;
 
     private WebView web;
+    private Bridge bridge;
     private long pausedAt = 0;
     private boolean screenWasOff = false;
 
@@ -62,7 +63,8 @@ public class MainActivity extends Activity {
             }
         });
 
-        web.addJavascriptInterface(new Bridge(this, web), "Android");
+        bridge = new Bridge(this, web);
+        web.addJavascriptInterface(bridge, "Android");
         setContentView(web);
         web.setFocusable(true);
         web.requestFocus();
@@ -76,6 +78,7 @@ public class MainActivity extends Activity {
     protected void onPause() {
         super.onPause();
         pausedAt = SystemClock.elapsedRealtime();
+        if (bridge != null) bridge.stopSpeech();
     }
 
     @Override
@@ -96,6 +99,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         try { unregisterReceiver(screenReceiver); } catch (Exception ignored) { }
+        if (bridge != null) bridge.shutdown();
         if (web != null) web.destroy();
         super.onDestroy();
     }

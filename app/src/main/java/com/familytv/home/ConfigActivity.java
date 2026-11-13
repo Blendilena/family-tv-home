@@ -11,6 +11,7 @@ import android.widget.Toast;
  * Invisible settings receiver, startable only from adb (protected by the DUMP permission):
  *   am start -n com.familytv.home/.ConfigActivity --es tmdb_key KEY
  *   am start -n com.familytv.home/.ConfigActivity --ez reset_pin true
+ *   am start -n com.familytv.home/.ConfigActivity --es kids 'Name1,Name2'
  */
 public class ConfigActivity extends Activity {
     @Override
@@ -23,6 +24,11 @@ public class ConfigActivity extends Activity {
         if (key != null && key.trim().length() > 0) {
             e.putString("tmdb_key", key.trim());
             msg.append("TMDB key saved. ");
+        }
+        String kids = in.getStringExtra("kids");
+        if (kids != null) {
+            e.putString("kids_names", kids.trim());
+            msg.append(kids.trim().isEmpty() ? "Kids' names cleared. " : "Kids' names saved. ");
         }
         if (in.getBooleanExtra("reset_pin", false)) {
             e.remove("pin_hash").remove("pin_salt");

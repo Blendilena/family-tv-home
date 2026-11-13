@@ -36,7 +36,8 @@
       el.textContent = el.getAttribute('data-clock') === 'date' ? d : t;
     });
     var h = now.getHours();
-    $('kids-greet').textContent = h < 12 ? 'Good morning, superstar!' : h < 17 ? 'Good afternoon, superstar!' : 'Good evening, superstar!';
+    var who = S.kidNames && S.kidNames.length ? joinNames(S.kidNames) : 'superstar';
+    $('kids-greet').textContent = (h < 12 ? 'Good morning, ' : h < 17 ? 'Good afternoon, ' : 'Good evening, ') + who + '!';
   }
 
   // ---------------------------------------------------------------- installed apps
@@ -123,8 +124,8 @@
 
   // ---------------------------------------------------------------- screens
   function show(name) {
-    ['picker', 'pin', 'kids', 'parents'].forEach(function (n) { $(n).classList.toggle('active', n === name); });
-    document.body.classList.toggle('kidsmode', name === 'kids');
+    ['picker', 'who', 'pin', 'kids', 'parents'].forEach(function (n) { $(n).classList.toggle('active', n === name); });
+    document.body.classList.toggle('kidsmode', name === 'kids' || name === 'who');
     S.screen = name;
     closeOverlay(true);
     setTimeout(function () { focusFirst(); }, 30);
@@ -138,8 +139,72 @@
   }
   function root() { return S.overlay ? $(S.overlay) : $(S.screen); }
 
+  // ---------------------------------------------------------------- which kid + voice
+  var KID_COLOURS = ['#3B7BFF', '#FF6B5B', '#19B5A5', '#8B5CF6'];
+  function kidNames() {
+    var raw = '';
+    try { raw = A.getKids ? A.getKids() : ''; } catch (e) { raw = ''; }
+    return raw.split(',').map(function (n) { return n.trim(); }).filter(Boolean).slice(0, 4);
+  }
+  function speak(text) { try { if (A.speak) A.speak(text); } catch (e) { } }
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  function joinNames(n) { return n.length < 2 ? (n[0] || '') : n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1]; }
+  function critter(colour, letter, size) {
+    return '<svg width="' + size + '" height="' + Math.round(size * 0.92) + '" viewBox="0 0 250 230" aria-hidden="true">' +
+      '<path d="M70 70 L95 20 L120 60 L150 15 L170 70 Z" fill="#FFC93C"/>' +
+      '<ellipse cx="125" cy="140" rx="100" ry="82" fill="' + colour + '"/>' +
+      '<ellipse cx="88" cy="118" rx="22" ry="26" fill="#fff"/><ellipse cx="162" cy="118" rx="22" ry="26" fill="#fff"/>' +
+      '<circle cx="94" cy="124" r="11" fill="#1F2240"/><circle cx="156" cy="124" r="11" fill="#1F2240"/>' +
+      '<circle cx="98" cy="119" r="4" fill="#fff"/><circle cx="160" cy="119" r="4" fill="#fff"/>' +
+      '<path d="M104 160 Q125 178 146 160" fill="none" stroke="#1F2240" stroke-width="7" stroke-linecap="round"/>' +
+      '<circle cx="62" cy="158" r="12" fill="#FF8FB1"/><circle cx="188" cy="158" r="12" fill="#FF8FB1"/>' +
+      '<text x="125" y="214" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="40" fill="#fff">' + esc(letter) + '</text></svg>';
+  }
+  function chooseKids() {
+    var names = kidNames();
+    if (!names.length) { S.kidNames = []; renderKids(); show('kids'); speak(pick(['Happy watching!', 'Let\u2019s find something awesome to watch!'])); return; }
+    var cards = names.map(function (n, i) {
+      return '<button class="who-card" data-nav data-kid="' + i + '"><span class="who-av">' + critter(KID_COLOURS[i % 4], n.charAt(0).toUpperCase(), 230) + '</span>' +
+        '<span class="who-name">' + esc(n) + '</span></button>';
+    });
+    if (names.length > 1) {
+      var av = names.map(function (n, i) { return critter(KID_COLOURS[i % 4], n.charAt(0).toUpperCase(), names.length > 2 ? 110 : 150); }).join('');
+      cards.push('<button class="who-card" data-nav data-kid="all"><span class="who-av">' + av + '</span>' +
+        '<span class="who-name">' + (names.length === 2 ? 'Both' : 'Everyone') + '</span><span class="who-sub">' + esc(joinNames(names)) + '</span></button>');
+    }
+    $('who-cards').innerHTML = cards.join('');
+    show('who');
+    speak('Who\u2019s watching? ' + joinNames(names.concat(names.length === 2 ? ['both'] : names.length > 2 ? ['everyone'] : [])).replace(' and ', names.length > 1 ? ' or ' : ' and ') + '?');
+  }
+  function welcome(names) {
+    var h = new Date().getHours();
+    var hello = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+    if (names.length === 1) {
+      var n = names[0];
+      return pick([
+        'Welcome, ' + n + '! Let\u2019s find something awesome to watch.',
+        hello + ', ' + n + '! Happy watching!',
+        'Hey ' + n + '! Ready for some fun? Let\u2019s go!',
+        'Welcome back, ' + n + '! What shall we watch today?',
+        'Hi ' + n + '! Grab a comfy spot. It\u2019s show time!'
+      ]);
+    }
+    var all = joinNames(names);
+    return pick([
+      'Welcome, ' + all + '! Team watching time. Let\u2019s go!',
+      hello + ', ' + all + '! Find something you\u2019ll all love.',
+      'Hi ' + all + '! Grab the comfy spots. It\u2019s show time!',
+      'Welcome, ' + all + '! Happy watching together!'
+    ]);
+  }
+  function chooseKid(which) {
+    var names = kidNames();
+    S.kidNames = which === 'all' ? names : [names[+which]].filter(Boolean);
+    speak(welcome(S.kidNames));
+    renderKids(); show('kids'); tick();
+  }
+
   // ---------------------------------------------------------------- picker + PIN
-  function chooseKids() { renderKids(); show('kids'); }
   function askPin(after, force) {
     if (!C.parentsPin && !force) { after(); return; }
     S.after = after; S.pinBuf = '';
@@ -476,11 +541,11 @@
     var b = el.getBoundingClientRect();
     return { l: b.left, r: b.right, t: b.top, b: b.bottom, cx: (b.left + b.right) / 2, cy: (b.top + b.bottom) / 2 };
   }
-  function rowOf(el) { return el.closest('[data-row], .kgrid, .krow, .pgrid, .pbtns, .ptabs, .kids-hero, .picker-cards, .pin-pad, .set-list, .detail-actions'); }
+  function rowOf(el) { return el.closest('[data-row], .kgrid, .krow, .pgrid, .pbtns, .ptabs, .kids-hero, .picker-cards, .who-cards, .pin-pad, .set-list, .detail-actions'); }
   function focusFirst() {
     var list = focusables();
     var r = root();
-    var prefer = r.querySelector('.pbtn.primary[data-nav], .kfeat[data-nav], .pick-kids, .pin-key, .set-item') || list[0];
+    var prefer = r.querySelector('.pbtn.primary[data-nav], .kfeat[data-nav], .pick-kids, .who-card, .pin-key, .set-item') || list[0];
     if (S.screen === 'parents' && !S.overlay) {
       var heroComing = S.tab === 'home' && $('phero') && $('phero').style.display !== 'none';
       prefer = r.querySelector('.pbtns .pbtn.primary') || (heroComing ? r.querySelector('.ptab.on') : null) ||
@@ -550,7 +615,9 @@
     var open = el.getAttribute('data-open');
     var tab = el.getAttribute('data-tab');
     var pin = el.getAttribute('data-pin');
+    var kid = el.getAttribute('data-kid');
     if (pin) return pinKey(pin);
+    if (kid) return chooseKid(kid);
     if (tab) { S.tab = tab; renderParents(); var t = root().querySelector('.ptab[data-tab="' + tab + '"]'); if (t) focusEl(t); return; }
     if (app) return openApp(app, el.getAttribute('data-label'));
     if (pkg) { if (!A.launch(pkg)) toast('Couldn’t open that app'); return; }
@@ -577,11 +644,12 @@
     if (S.overlay) return closeOverlay();
     if (S.screen === 'pin') return show('picker');
     if (S.screen === 'parents' && S.tab !== 'home') { S.tab = 'home'; renderParents(); setTimeout(focusFirst, 30); return; }
-    if (S.screen === 'kids' || S.screen === 'parents') return show('picker');
+    if (S.screen === 'kids' && kidNames().length) return chooseKids();
+    if (S.screen === 'who' || S.screen === 'kids' || S.screen === 'parents') return show('picker');
   };
   app.onWake = function (relock) {
     loadApps();
-    if (relock) { S.icons = {}; show('picker'); return; }
+    if (relock) { S.icons = {}; S.kidNames = []; show('picker'); return; }
     if (S.screen === 'kids') renderKids();
   };
   app.reload = function () { if (S.screen === 'parents') renderParents(); if (S.screen === 'kids') renderKids(); };
@@ -614,6 +682,8 @@
       setPin: function (p) { pin = p; return true; },
       checkPin: function (p) { return p === pin ? 'ok' : 'bad'; },
       hasTmdbKey: function () { return false; },
+      getKids: function () { return 'Alex,Sam'; },
+      speak: function (t) { window.__spoken = (window.__spoken || []).concat(t); },
       tmdb: function (path, id) { setTimeout(function () { app.tmdbDone(id, 0, ''); }, 10); }
     };
   }

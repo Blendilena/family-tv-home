@@ -13,6 +13,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.speech.tts.TextToSpeech;
 import android.util.Base64;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
@@ -29,6 +30,7 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -48,11 +50,57 @@ public class Bridge {
     private final ExecutorService pool = Executors.newFixedThreadPool(3);
     private int pinFailures = 0;
     private long lockedUntil = 0;
+    private TextToSpeech tts;
+    private volatile boolean ttsReady = false;
+    private String pendingSpeech;
 
     Bridge(Activity act, WebView web) {
         this.act = act;
         this.web = web;
         this.prefs = act.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        try {
+            tts = new TextToSpeech(act.getApplicationContext(), new TextToSpeech.OnInitListener() {
+                @Override
+                public void onInit(int status) {
+                    if (status != TextToSpeech.SUCCESS) return;
+                    if (tts.setLanguage(new Locale("en", "AU")) < 0) tts.setLanguage(Locale.US);
+                    tts.setPitch(1.12f);
+                    tts.setSpeechRate(0.98f);
+                    ttsReady = true;
+                    if (pendingSpeech != null) { say(pendingSpeech); pendingSpeech = null; }
+                }
+            });
+        } catch (Exception ignored) { }
+    }
+
+    // ------------------------------------------------------------------ voice
+
+    /** Speaks a short line through the TV's text-to-speech voice. */
+    @JavascriptInterface
+    public void speak(String text) {
+        if (text == null || text.trim().isEmpty()) return;
+        if (text.length() > 300) text = text.substring(0, 300);
+        if (ttsReady) say(text); else pendingSpeech = text;
+    }
+
+    private void say(String text) {
+        try { tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "familytv"); } catch (Exception ignored) { }
+    }
+
+    void stopSpeech() {
+        pendingSpeech = null;
+        try { if (tts != null) tts.stop(); } catch (Exception ignored) { }
+    }
+
+    void shutdown() {
+        try { if (tts != null) tts.shutdown(); } catch (Exception ignored) { }
+        pool.shutdownNow();
+    }
+
+    /** Kids' first names, comma separated, set from the PC (never stored in the app's code). */
+    @JavascriptInterface
+    public String getKids() {
+        return prefs.getString("kids_names", "");
     }
 
     // ------------------------------------------------------------------ apps
