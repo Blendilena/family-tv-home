@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Family TV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="stage">
+
+  <!-- 1 · Who's watching? -->
+  <section id="picker" class="screen active" aria-label="Who's watching?">
+    <div class="glow g1" aria-hidden="true"></div>
+    <div class="glow g2" aria-hidden="true"></div>
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F2240" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></span>Family TV</div>
+      <div class="clock"><div class="time" data-clock="time"></div><div class="date" data-clock="date"></div></div>
+    </header>
+    <div class="picker-body">
+      <h1>Who's watching?</h1>
+      <div class="picker-cards">
+        <button class="pick pick-kids" data-nav data-action="kids" aria-label="Kids">
+          <svg class="bob mascot" width="250" height="230" viewBox="0 0 250 230" aria-hidden="true"><use href="#mascot"/></svg>
+          <span class="pick-title">Kids</span>
+          <span class="pick-sub">Cartoons, games and YouTube</span>
+        </button>
+        <button class="pick pick-parents" data-nav data-action="parents" aria-label="Parents, PIN protected">
+          <span class="pick-badge" aria-hidden="true"><svg width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="#E8B04B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16v4"/><path d="M10 8.5l4 1.5-4 1.5z" fill="#E8B04B"/></svg></span>
+          <span class="pick-title">Parents</span>
+          <span class="pick-sub"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8B04B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Movies, series and live TV · PIN</span>
+        </button>
+      </div>
+    </div>
+    <footer class="hints"><span>◀ ▶ to choose</span><span>OK to start</span></footer>
+  </section>
+
+  <!-- PIN pad -->
+  <section id="pin" class="screen" aria-label="Parents PIN">
+    <div class="pin-box">
+      <h2 id="pin-title">Enter parents PIN</h2>
+      <p id="pin-sub">4 digits</p>
+      <div class="pin-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="pin-pad" id="pin-pad"></div>
+      <p id="pin-msg" role="status"></p>
+    </div>
+  </section>
+
+  <!-- 2 · Kids -->
+  <section id="kids" class="screen" aria-label="Kids home">
+    <div class="kids-scroll page-scroll">
+      <svg class="cloud drift" aria-hidden="true" width="220" height="90" viewBox="0 0 220 90"><ellipse cx="70" cy="55" rx="60" ry="30" fill="#fff"/><ellipse cx="120" cy="40" rx="50" ry="36" fill="#fff"/><ellipse cx="165" cy="58" rx="45" ry="26" fill="#fff"/></svg>
+      <header class="kids-top">
+        <div class="kids-hello">
+          <svg class="bob" width="84" height="78" viewBox="0 0 250 230" aria-hidden="true"><use href="#mascot"/></svg>
+          <div><div class="kids-greet" id="kids-greet">Hi there, superstar!</div><div class="kids-q">What do you want to watch today?</div></div>
+        </div>
+        <div class="kids-right">
+          <span class="kids-time" data-clock="time"></span>
+          <button class="pill" data-nav data-action="grownups"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Grown-ups</button>
+        </div>
+      </header>
+      <div class="kids-hero" id="kids-hero"></div>
+      <section class="ksec"><h2>My shows and apps</h2><div class="kgrid" id="kids-apps"></div></section>
+      <section class="ksec"><h2>Games</h2><div class="krow" id="kids-games"></div></section>
+      <section class="ksec"><h2>Family movies on Netflix and Prime <span class="chip">updates every day</span></h2><div class="krow row-scroll" id="kids-movies"></div></section>
+      <section class="ksec"><h2>Kids series</h2><div class="krow row-scroll" id="kids-series"></div></section>
+      <div class="kids-foot">Movie info from TMDB</div>
+    </div>
+  </section>
+
+  <!-- 3 · Parents -->
+  <section id="parents" class="screen" aria-label="Parents home">
+    <header class="ptop">
+      <nav class="ptabs" id="ptabs">
+        <span class="plogo">Family TV</span>
+        <button class="ptab" data-nav data-tab="home">Home</button>
+        <button class="ptab" data-nav data-tab="movies">Movies</button>
+        <button class="ptab" data-nav data-tab="series">Series</button>
+        <button class="ptab" data-nav data-tab="live">Live TV</button>
+        <button class="ptab" data-nav data-tab="apps">Apps</button>
+      </nav>
+      <div class="pright">
+        <button class="picon" data-nav data-action="settings" aria-label="Settings"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+        <span class="ptime" data-clock="time"></span>
+        <button class="pswitch" data-nav data-action="switch"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Switch user</button>
+      </div>
+    </header>
+    <div class="pbody page-scroll" id="pbody"></div>
+  </section>
+
+  <!-- Title details -->
+  <section id="detail" class="overlay" aria-label="Title details">
+    <div class="detail-bg" id="detail-bg"></div>
+    <div class="detail-scrim"></div>
+    <div class="detail-body">
+      <span class="detail-kicker" id="detail-kicker"></span>
+      <h2 id="detail-title"></h2>
+      <p class="detail-meta" id="detail-meta"></p>
+      <p class="detail-overview" id="detail-overview"></p>
+      <div class="detail-actions" id="detail-actions"></div>
+      <p class="detail-hint">Opens the app; search for the title there if it doesn't appear straight away.</p>
+    </div>
+  </section>
+
+  <!-- Settings -->
+  <section id="settings" class="overlay" aria-label="Settings">
+    <div class="set-box">
+      <h2>Settings</h2>
+      <div class="set-list" id="set-list"></div>
+      <p class="set-about" id="set-about"></p>
+    </div>
+  </section>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="mascot">
+      <path d="M70 70 L95 20 L120 60 L150 15 L170 70 Z" fill="#FF6B5B"/>
+      <ellipse cx="125" cy="140" rx="100" ry="82" fill="#3B7BFF"/>
+      <ellipse cx="88" cy="128" rx="24" ry="28" fill="#fff"/>
+      <ellipse cx="162" cy="128" rx="24" ry="28" fill="#fff"/>
+      <circle cx="94" cy="134" r="12" fill="#1F2240"/>
+      <circle cx="156" cy="134" r="12" fill="#1F2240"/>
+      <circle cx="98" cy="129" r="4" fill="#fff"/>
+      <circle cx="160" cy="129" r="4" fill="#fff"/>
+      <path d="M100 178 Q125 200 150 178" fill="none" stroke="#1F2240" stroke-width="7" stroke-linecap="round"/>
+      <circle cx="62" cy="168" r="12" fill="#FF8FB1"/>
+      <circle cx="188" cy="168" r="12" fill="#FF8FB1"/>
+    </g>
+  </defs>
+</svg>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
