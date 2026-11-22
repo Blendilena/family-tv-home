@@ -1,0 +1,58 @@
+/* Family TV screensaver */
+.ss { position: absolute; inset: 0; display: none; overflow: hidden; }
+.ss.active { display: block; }
+
+/* ---------- grown-ups: cinematic slideshow ---------- */
+#ss-film { background: #05070A; color: #F2F4F8; font-family: Inter, system-ui, sans-serif; }
+.ss-aurora { position: absolute; inset: -20%; filter: blur(80px); opacity: .55; }
+.ss-aurora i { position: absolute; width: 900px; height: 900px; border-radius: 50%; animation: aur 30s ease-in-out infinite alternate; }
+.ss-aurora i:nth-child(1) { background: #3B2A7A; left: 10%; top: 10%; }
+.ss-aurora i:nth-child(2) { background: #0F5A6E; left: 45%; top: 30%; animation-delay: -10s; }
+.ss-aurora i:nth-child(3) { background: #7A4A1F; left: 25%; top: 55%; animation-delay: -20s; }
+@keyframes aur { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(160px,-120px) scale(1.25); } }
+.ss-layer { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transition: opacity 1.6s ease; will-change: opacity, transform; }
+.ss-layer.show { opacity: 1; }
+.kb1 { animation: kb1 14s linear both; } .kb2 { animation: kb2 14s linear both; }
+.kb3 { animation: kb3 14s linear both; } .kb4 { animation: kb4 14s linear both; }
+@keyframes kb1 { from { transform: scale(1.18) translate(-2%, -1%); } to { transform: scale(1.04) translate(1%, 1%); } }
+@keyframes kb2 { from { transform: scale(1.04) translate(1.5%, 0); } to { transform: scale(1.18) translate(-1.5%, -1%); } }
+@keyframes kb3 { from { transform: scale(1.16) translate(1%, 1.5%); } to { transform: scale(1.05) translate(-1%, -1%); } }
+@keyframes kb4 { from { transform: scale(1.05) translate(-1%, 1%); } to { transform: scale(1.17) translate(1.5%, -1%); } }
+.ss-shade { position: absolute; inset: 0; background:
+  radial-gradient(ellipse at center, rgba(0,0,0,0) 45%, rgba(0,0,0,.55) 100%),
+  linear-gradient(0deg, rgba(5,7,10,.92) 0%, rgba(5,7,10,.4) 30%, rgba(5,7,10,0) 55%),
+  linear-gradient(200deg, rgba(5,7,10,.75) 0%, rgba(5,7,10,0) 35%); }
+.ss-info { position: absolute; left: 110px; bottom: 110px; max-width: 1100px; }
+.ss-kicker { display: flex; align-items: center; gap: 14px; font-size: 22px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #E8B04B; }
+.ss-kicker b { background: #E8B04B; color: #0E1116; padding: 4px 12px; border-radius: 8px; letter-spacing: 0; }
+.ss-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 96px; line-height: 1; letter-spacing: -2px; margin-top: 14px; text-shadow: 0 6px 40px rgba(0,0,0,.6); }
+.ss-meta { font-size: 26px; color: #C9D0DB; margin-top: 16px; }
+.ss-info > * { animation: ssIn 1.2s cubic-bezier(.16,1,.3,1) both; }
+.ss-info > *:nth-child(2) { animation-delay: .12s; } .ss-info > *:nth-child(3) { animation-delay: .24s; }
+@keyframes ssIn { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+.ss-info.out > * { opacity: 0; transform: translateY(-14px); transition: all .5s ease; animation: none; }
+.ss-clock { position: absolute; right: 110px; top: 90px; text-align: right; transition: transform 3s ease; }
+.ss-time { font-family: 'Space Grotesk', sans-serif; font-weight: 300; font-size: 150px; line-height: 1; letter-spacing: -4px; text-shadow: 0 6px 40px rgba(0,0,0,.5); }
+.ss-date { font-size: 30px; color: #DDE2EA; margin-top: 10px; letter-spacing: .5px; }
+.ss-weather { display: flex; justify-content: flex-end; align-items: center; gap: 14px; margin-top: 18px; font-size: 28px; color: #F2F4F8; }
+.ss-weather small { font-size: 22px; color: #C9D0DB; }
+.ss-weather svg { flex-shrink: 0; }
+.ss-bar { position: absolute; left: 110px; right: 110px; bottom: 60px; height: 3px; background: rgba(255,255,255,.12); border-radius: 3px; overflow: hidden; }
+.ss-bar b { display: block; height: 100%; width: 100%; background: #E8B04B; transform-origin: 0 50%; transform: scaleX(0); }
+.ss-bar b.run { animation: ssBar linear forwards; }
+@keyframes ssBar { to { transform: scaleX(1); } }
+.ss-credit { position: absolute; right: 110px; bottom: 76px; font-size: 16px; color: rgba(242,244,248,.45); }
+
+/* ---------- kids: sleepy sky ---------- */
+#ss-kids { background: #8FDBFF; color: #1F2240; font-family: Fredoka, system-ui, sans-serif; }
+.ssk-card { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -54%); width: 820px; padding: 40px 60px 50px; border-radius: 64px; background: rgba(255,255,255,.88); box-shadow: 0 16px 0 rgba(31,34,64,.15); text-align: center; transition: transform 3s ease; }
+.ssk-mascot { margin-top: -150px; animation: float 5s ease-in-out infinite; }
+.ssk-z { position: absolute; left: 60%; top: -110px; font-weight: 700; color: #1F2240; }
+.ssk-z span { position: absolute; opacity: 0; animation: zz 4.5s ease-in infinite; }
+.ssk-z span:nth-child(1) { font-size: 64px; } .ssk-z span:nth-child(2) { font-size: 48px; animation-delay: 1.5s; } .ssk-z span:nth-child(3) { font-size: 36px; animation-delay: 3s; }
+@keyframes zz { 0% { opacity: 0; transform: translate(0, 40px) rotate(-10deg); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(120px, -140px) rotate(14deg); } }
+.ssk-time { font-weight: 700; font-size: 170px; line-height: 1; letter-spacing: -3px; }
+.ssk-date { font-weight: 600; font-size: 34px; margin-top: 4px; }
+.ssk-msg { font-weight: 500; font-size: 28px; color: #4A4E70; margin-top: 18px; }
+.ssk-weather { display: inline-flex; align-items: center; gap: 14px; margin-top: 22px; padding: 10px 26px; border-radius: 999px; background: #FFD84D; font-weight: 600; font-size: 28px; }
+.ssk-weather:empty { display: none; }

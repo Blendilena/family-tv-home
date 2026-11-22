@@ -1,6 +1,5 @@
 package com.familytv.home;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -44,7 +43,7 @@ public class Bridge {
             Pattern.compile("^(discover|trending|movie|tv|genre)/[A-Za-z0-9/_\\-]+(\\?[A-Za-z0-9_=&.%|:,\\-]*)?$");
     private static final Pattern PIN = Pattern.compile("^\\d{4}$");
 
-    private final Activity act;
+    private final Context act;   // the app context (main screen or screensaver)
     private final WebView web;
     private final SharedPreferences prefs;
     private final ExecutorService pool = Executors.newFixedThreadPool(3);
@@ -54,8 +53,8 @@ public class Bridge {
     private volatile boolean ttsReady = false;
     private String pendingSpeech;
 
-    Bridge(Activity act, WebView web) {
-        this.act = act;
+    Bridge(Context ctx, WebView web) {
+        this.act = ctx.getApplicationContext();
         this.web = web;
         this.prefs = act.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         try {
@@ -206,7 +205,7 @@ public class Bridge {
     }
 
     private void start(final Intent i) {
-        act.runOnUiThread(new Runnable() {
+        web.post(new Runnable() {
             @Override
             public void run() {
                 try { act.startActivity(i); } catch (Exception ignored) { }
@@ -221,6 +220,43 @@ public class Bridge {
         } catch (Exception e) {
             return "?";
         }
+    }
+
+    // ------------------------------------------------------------------ screensaver support
+
+    /** Which home the family was last on ("kids", "parents" or "family"); the screensaver follows it. */
+    @JavascriptInterface
+    public void setLastMode(String mode) {
+        if (mode != null && mode.matches("kids|parents|family")) prefs.edit().putString("last_mode", mode).apply();
+    }
+
+    @JavascriptInterface
+    public String getLastMode() {
+        return prefs.getString("last_mode", "family");
+    }
+
+    /** "Name|lat|lon" set from the PC with firetv.ps1 homeapp-weather, or "". */
+    @JavascriptInterface
+    public String getWeatherPlace() {
+        return prefs.getString("weather_place", "");
+    }
+
+    /** Current screensaver: "family", "aerial", "amazon" or the raw component. */
+    @JavascriptInterface
+    public String getScreensaver() {
+        String c = android.provider.Settings.Secure.getString(act.getContentResolver(), "screensaver_components");
+        return Screensavers.nameOf(c);
+    }
+
+    /** Switches screensaver; needs WRITE_SECURE_SETTINGS, which the PC toolkit grants. */
+    @JavascriptInterface
+    public boolean setScreensaver(String which) {
+        return Screensavers.set(act, which);
+    }
+
+    @JavascriptInterface
+    public boolean isInstalled(String pkg) {
+        try { act.getPackageManager().getPackageInfo(pkg, 0); return true; } catch (Exception e) { return false; }
     }
 
     // ------------------------------------------------------------------ parents PIN

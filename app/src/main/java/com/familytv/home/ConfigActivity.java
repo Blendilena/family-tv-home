@@ -40,6 +40,11 @@ public class ConfigActivity extends Activity {
             e.putString("kids_names", kids.trim());
             msg.append(kids.trim().isEmpty() ? "Kids' names cleared. " : "Kids' names saved. ");
         }
+        String weather = in.getStringExtra("weather");
+        if (weather != null) {
+            e.putString("weather_place", weather.trim());
+            msg.append(weather.trim().isEmpty() ? "Weather turned off. " : "Weather place saved. ");
+        }
         if (in.getBooleanExtra("reset_pin", false)) {
             e.remove("pin_hash").remove("pin_salt");
             msg.append("Parents PIN cleared: set a new one next time. ");

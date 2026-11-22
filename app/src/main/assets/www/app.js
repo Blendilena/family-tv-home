@@ -126,6 +126,7 @@
   function show(name) {
     ['picker', 'who', 'pin', 'kids', 'parents'].forEach(function (n) { $(n).classList.toggle('active', n === name); });
     document.body.classList.toggle('kidsmode', name === 'kids' || name === 'who');
+    try { if (A.setLastMode) A.setLastMode(name === 'kids' || name === 'who' ? 'kids' : name === 'parents' ? 'parents' : 'family'); } catch (e) { }
     S.screen = name;
     closeOverlay(true);
     setTimeout(function () { focusFirst(); }, 30);
@@ -517,6 +518,21 @@
     openOverlay('detail');
   }
   function openService(it) { openApp(it._service === 'prime' ? 'prime' : 'netflix'); }
+  var SS_NAMES = { family: 'Family TV', aerial: 'Aerial Views', amazon: 'Amazon' };
+  function ssLabel() {
+    var cur = ''; try { cur = A.getScreensaver ? A.getScreensaver() : ''; } catch (e) { }
+    return (SS_NAMES[cur] || 'Amazon') + '  \u25B8';
+  }
+  function nextScreensaver() {
+    var order = ['family', 'aerial', 'amazon'];
+    var cur = ''; try { cur = A.getScreensaver(); } catch (e) { }
+    var i = order.indexOf(cur), tries = 0, n;
+    do { i = (i + 1) % order.length; n = order[i]; tries++; }
+    while (n === 'aerial' && !(A.isInstalled && A.isInstalled('com.neilturner.aerialviews')) && tries < 4);
+    if (A.setScreensaver && A.setScreensaver(n)) { toast('Screensaver: ' + SS_NAMES[n]); }
+    else { toast('Run firetv.ps1 screensaver on the PC once to allow switching here'); }
+    var b = document.querySelector('[data-action="ss-next"] span:last-child'); if (b) b.textContent = ssLabel();
+  }
   function openSettings() {
     S.returnFocus = document.activeElement;
     var items = [
@@ -524,6 +540,8 @@
       ['refresh', 'Refresh movies and series', ''],
       ['fire-settings', 'Fire TV settings', ''],
       ['amazon-home', 'Amazon home', 'for 30 minutes'],
+      ['ss-next', 'Screensaver', ssLabel()],
+      ['ss-preview', 'Preview Family TV screensaver', ''],
       ['close', 'Close', '']
     ];
     $('set-list').innerHTML = items.filter(Boolean).map(function (i) { return '<button class="set-item" data-nav data-action="' + i[0] + '"><span>' + i[1] + '</span><span>' + i[2] + '</span></button>'; }).join('');
@@ -635,6 +653,8 @@
       case 'close': return closeOverlay();
       case 'fire-settings': return A.openSettings();
       case 'amazon-home': if (A.openAmazonHome) A.openAmazonHome(); return;
+      case 'ss-next': return nextScreensaver();
+      case 'ss-preview': location.href = 'screensaver.html?preview=1&mode=family'; return;
       case 'refresh':
         try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('tmdb:') === 0) localStorage.removeItem(k); }); } catch (e) { }
         closeOverlay(true); renderParents(); toast('Refreshing…'); return;

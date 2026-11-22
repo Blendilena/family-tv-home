@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Family TV screensaver</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Grotesk:wght@300;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="screensaver.css">
+</head>
+<body>
+<div id="stage">
+
+  <!-- Grown-ups: cinematic slideshow -->
+  <section id="ss-film" class="ss">
+    <div class="ss-aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="ss-layer" id="ss-a"></div>
+    <div class="ss-layer" id="ss-b"></div>
+    <div class="ss-shade" aria-hidden="true"></div>
+    <div class="ss-info" id="ss-info"></div>
+    <div class="ss-clock" id="ss-clock">
+      <div class="ss-time" data-clock="time"></div>
+      <div class="ss-date" data-clock="date"></div>
+      <div class="ss-weather" id="ss-weather"></div>
+    </div>
+    <div class="ss-bar" aria-hidden="true"><b id="ss-bar"></b></div>
+    <div class="ss-credit">Images from TMDB</div>
+  </section>
+
+  <!-- Kids: sleepy sky -->
+  <section id="ss-kids" class="ss">
+    <div class="kids-bg" aria-hidden="true">
+      <svg width="1920" height="1080" viewBox="0 0 1920 1080">
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6FCBFF"/><stop offset="1" stop-color="#D6F3FF"/></linearGradient>
+          <pattern id="dots" width="34" height="34" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="3" fill="#FFFFFF" opacity=".35"/></pattern>
+        </defs>
+        <rect width="1920" height="1080" fill="url(#sky)"/>
+        <rect width="1920" height="1080" fill="url(#dots)"/>
+        <!-- sun -->
+        <g class="spin" style="transform-origin:1700px 150px">
+          <g stroke="#FFC93C" stroke-width="14" stroke-linecap="round">
+            <path d="M1700 20v-40M1700 280v40M1570 150h-40M1830 150h40M1608 58l-28-28M1792 242l28 28M1608 242l-28 28M1792 58l28-28"/>
+          </g>
+        </g>
+        <circle cx="1700" cy="150" r="92" fill="#FFD84D"/>
+        <circle cx="1670" cy="135" r="9" fill="#1F2240"/><circle cx="1730" cy="135" r="9" fill="#1F2240"/>
+        <path d="M1668 170 Q1700 196 1732 170" fill="none" stroke="#1F2240" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="1650" cy="165" r="12" fill="#FF8FB1" opacity=".8"/><circle cx="1750" cy="165" r="12" fill="#FF8FB1" opacity=".8"/>
+        <!-- rainbow -->
+        <g fill="none" stroke-width="34" opacity=".9">
+          <path d="M-60 1080 A560 560 0 0 1 1060 1080" stroke="#FF5A5F"/>
+          <path d="M-26 1080 A526 526 0 0 1 1026 1080" stroke="#FF9F43"/>
+          <path d="M8 1080 A492 492 0 0 1 992 1080" stroke="#FFD84D"/>
+          <path d="M42 1080 A458 458 0 0 1 958 1080" stroke="#5BD46B"/>
+          <path d="M76 1080 A424 424 0 0 1 924 1080" stroke="#3B9BFF"/>
+          <path d="M110 1080 A390 390 0 0 1 890 1080" stroke="#9B6BFF"/>
+        </g>
+        <!-- clouds -->
+        <g class="drift" fill="#FFFFFF"><ellipse cx="300" cy="240" rx="90" ry="44"/><ellipse cx="370" cy="214" rx="70" ry="54"/><ellipse cx="440" cy="246" rx="70" ry="40"/></g>
+        <g class="drift2" fill="#FFFFFF" opacity=".9"><ellipse cx="1180" cy="120" rx="80" ry="38"/><ellipse cx="1240" cy="98" rx="60" ry="46"/><ellipse cx="1300" cy="124" rx="62" ry="34"/></g>
+        <!-- balloons -->
+        <g class="float1"><path d="M1860 470 q-6 70 10 140" stroke="#1F2240" stroke-width="3" fill="none"/><ellipse cx="1860" cy="420" rx="44" ry="54" fill="#FF5A5F"/><ellipse cx="1846" cy="400" rx="10" ry="16" fill="#FFFFFF" opacity=".5"/></g>
+        <g class="float2"><path d="M1790 560 q8 70 -6 140" stroke="#1F2240" stroke-width="3" fill="none"/><ellipse cx="1790" cy="510" rx="40" ry="50" fill="#9B6BFF"/><ellipse cx="1776" cy="492" rx="9" ry="14" fill="#FFFFFF" opacity=".5"/></g>
+        <g class="float3"><path d="M50 600 q-8 70 8 140" stroke="#1F2240" stroke-width="3" fill="none"/><ellipse cx="50" cy="550" rx="40" ry="50" fill="#5BD46B"/><ellipse cx="36" cy="532" rx="9" ry="14" fill="#FFFFFF" opacity=".5"/></g>
+        <!-- kite -->
+        <g class="float2"><path d="M1480 330 l50 -70 l50 70 l-50 90 z" fill="#FF9F43"/><path d="M1530 260 v160 M1480 330 h100" stroke="#FFFFFF" stroke-width="4"/><path d="M1530 420 q-30 50 10 90 q40 40 0 90" stroke="#1F2240" stroke-width="3" fill="none"/><path d="M1522 470 l16 8 -16 8z M1530 540 l16 8 -16 8z" fill="#FF5A5F"/></g>
+        <!-- confetti -->
+        <g class="twinkle">
+          <path d="M760 70 l10 22 22 10 -22 10 -10 22 -10 -22 -22 -10 22 -10z" fill="#FFFFFF"/>
+          <path d="M1060 300 l7 16 16 7 -16 7 -7 16 -7 -16 -16 -7 16 -7z" fill="#FFD84D"/>
+          <path d="M140 420 l7 16 16 7 -16 7 -7 16 -7 -16 -16 -7 16 -7z" fill="#FFFFFF"/>
+        </g>
+        <g opacity=".85">
+          <circle cx="620" cy="160" r="9" fill="#FF5A5F"/><circle cx="980" cy="210" r="7" fill="#9B6BFF"/><rect x="1380" y="210" width="16" height="16" rx="3" fill="#5BD46B" transform="rotate(25 1388 218)"/>
+          <circle cx="1880" cy="760" r="9" fill="#FFD84D"/><rect x="24" y="340" width="16" height="16" rx="3" fill="#FF9F43" transform="rotate(-20 32 348)"/><circle cx="1860" cy="300" r="7" fill="#FFFFFF"/>
+        </g>
+        <!-- hills -->
+        <ellipse cx="1500" cy="1160" rx="760" ry="260" fill="#7ED957"/>
+        <ellipse cx="420" cy="1190" rx="720" ry="230" fill="#5BC236"/>
+        <!-- flowers -->
+        <g><path d="M1180 1000 v40" stroke="#2E8B3A" stroke-width="5"/><circle cx="1180" cy="995" r="14" fill="#FF8FB1"/><circle cx="1180" cy="995" r="6" fill="#FFD84D"/></g>
+        <g><path d="M1260 1010 v40" stroke="#2E8B3A" stroke-width="5"/><circle cx="1260" cy="1005" r="14" fill="#FFFFFF"/><circle cx="1260" cy="1005" r="6" fill="#FF9F43"/></g>
+        <g><path d="M300 1030 v36" stroke="#2E8B3A" stroke-width="5"/><circle cx="300" cy="1025" r="13" fill="#9B6BFF"/><circle cx="300" cy="1025" r="5" fill="#FFD84D"/></g>
+        <!-- friends: pink bunny-blob, green dino-blob, the blue mascot -->
+        <g class="hop" style="transform-origin:1450px 1000px">
+          <ellipse cx="1430" cy="930" rx="14" ry="40" fill="#FF8FB1"/><ellipse cx="1470" cy="930" rx="14" ry="40" fill="#FF8FB1"/>
+          <ellipse cx="1450" cy="1000" rx="62" ry="54" fill="#FFB3CC"/>
+          <circle cx="1430" cy="990" r="8" fill="#1F2240"/><circle cx="1470" cy="990" r="8" fill="#1F2240"/>
+          <path d="M1438 1018 Q1450 1028 1462 1018" fill="none" stroke="#1F2240" stroke-width="5" stroke-linecap="round"/>
+        </g>
+        <g class="bob" style="transform-origin:1640px 990px">
+          <path d="M1590 960 l14 -30 14 26 14 -30 14 26 14 -28 10 36" fill="#2E8B3A"/>
+          <ellipse cx="1650" cy="1000" rx="82" ry="60" fill="#4CC76A"/>
+          <path d="M1720 1010 q60 0 70 -40 q-10 60 -70 64z" fill="#4CC76A"/>
+          <circle cx="1620" cy="985" r="15" fill="#FFFFFF"/><circle cx="1624" cy="988" r="7" fill="#1F2240"/>
+          <path d="M1600 1020 Q1625 1036 1650 1020" fill="none" stroke="#1F2240" stroke-width="5" stroke-linecap="round"/>
+        </g>
+        
+      </svg>
+    </div>
+    <div class="ssk-card" id="ssk-card">
+      <svg class="ssk-mascot" width="260" height="240" viewBox="0 0 250 230" aria-hidden="true">
+        <path d="M70 70 L95 20 L120 60 L150 15 L170 70 Z" fill="#FF6B5B"/>
+        <ellipse cx="125" cy="140" rx="100" ry="82" fill="#3B7BFF"/>
+        <path d="M70 130 Q88 142 106 130" fill="none" stroke="#1F2240" stroke-width="7" stroke-linecap="round"/>
+        <path d="M144 130 Q162 142 180 130" fill="none" stroke="#1F2240" stroke-width="7" stroke-linecap="round"/>
+        <ellipse cx="125" cy="178" rx="14" ry="10" fill="#1F2240"/>
+        <circle cx="62" cy="160" r="12" fill="#FF8FB1"/><circle cx="188" cy="160" r="12" fill="#FF8FB1"/>
+      </svg>
+      <div class="ssk-z" aria-hidden="true"><span>Z</span><span>z</span><span>z</span></div>
+      <div class="ssk-time" data-clock="time"></div>
+      <div class="ssk-date" data-clock="date"></div>
+      <div class="ssk-msg">Shh… the TV is having a little rest</div>
+      <div class="ssk-weather" id="ssk-weather"></div>
+    </div>
+  </section>
+</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="mascot">
+      <path d="M70 70 L95 20 L120 60 L150 15 L170 70 Z" fill="#FF6B5B"/>
+      <ellipse cx="125" cy="140" rx="100" ry="82" fill="#3B7BFF"/>
+      <ellipse cx="88" cy="128" rx="24" ry="28" fill="#fff"/><ellipse cx="162" cy="128" rx="24" ry="28" fill="#fff"/>
+      <circle cx="94" cy="134" r="12" fill="#1F2240"/><circle cx="156" cy="134" r="12" fill="#1F2240"/>
+      <path d="M100 178 Q125 200 150 178" fill="none" stroke="#1F2240" stroke-width="7" stroke-linecap="round"/>
+    </g>
+  </defs>
+</svg>
+<script src="config.js"></script>
+<script src="screensaver.js"></script>
+</body>
+</html>
