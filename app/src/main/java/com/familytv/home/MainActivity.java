@@ -93,6 +93,7 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         WakeService.inFront = true;
+        Bouncer.lastResumed = SystemClock.elapsedRealtime();
         WakeService.start(this);
         HomeWatchService.clearAmazonHomeAllowance(this);
         boolean relock = screenWasOff

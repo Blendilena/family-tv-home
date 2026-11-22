@@ -4,9 +4,6 @@ import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
@@ -23,9 +20,6 @@ public class HomeWatchService extends AccessibilityService {
     static final String TAG = "FamilyTVHome";
     static final String LAUNCHER = "com.amazon.tv.launcher";
 
-    private final Handler handler = new Handler(Looper.getMainLooper());
-    private long lastJump = 0;
-
     @Override
     protected void onServiceConnected() {
         Log.i(TAG, "home watch connected");
@@ -38,25 +32,12 @@ public class HomeWatchService extends AccessibilityService {
         CharSequence pkg = e.getPackageName();
         if (pkg == null || !LAUNCHER.contentEquals(pkg)) return;
         String cls = e.getClassName() == null ? "" : e.getClassName().toString();
-        if (amazonHomeAllowed(this)) {
-            Log.i(TAG, "launcher " + cls + " allowed (parents chose Amazon home)");
+        // Leave pop-ups and overlays (dialogs, menus, toasts) alone; act on full screens.
+        if (cls.startsWith("android.") || cls.contains("Dialog") || cls.contains("Popup") || cls.contains("Toast")) {
+            Log.i(TAG, "launcher window " + cls + " ignored");
             return;
         }
-        // Only full screens: leave pop-ups and overlays (dialogs, menus) alone.
-        boolean screen = cls.endsWith("Activity") || cls.contains("Activity_") || cls.contains(".activity.") || cls.contains("Home");
-        if (!screen || cls.startsWith("android.")) {
-            Log.i(TAG, "launcher " + cls + " ignored");
-            return;
-        }
-        long now = SystemClock.elapsedRealtime();
-        if (now - lastJump < 900) return;
-        lastJump = now;
-        Log.i(TAG, "launcher " + cls + " -> Family TV");
-        handler.removeCallbacksAndMessages(null);
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() { WakeService.openHome(HomeWatchService.this); }
-        }, 60);
+        Bouncer.launcherSeen(this, "launcher window " + cls);
     }
 
     @Override

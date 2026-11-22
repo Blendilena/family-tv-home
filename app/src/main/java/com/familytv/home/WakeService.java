@@ -48,10 +48,11 @@ public class WakeService extends Service {
             } else {
                 return;
             }
+            final String why = Intent.ACTION_SCREEN_ON.equals(a) ? "TV woke up" : "screensaver ended";
             handler.removeCallbacksAndMessages(null);
             handler.postDelayed(new Runnable() {
                 @Override
-                public void run() { openHome(WakeService.this); }
+                public void run() { Bouncer.launcherSeen(WakeService.this, why); }
             }, delay);
         }
     };
