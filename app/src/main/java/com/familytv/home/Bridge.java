@@ -192,6 +192,12 @@ public class Bridge {
         return true;
     }
 
+    /** Parents can visit Amazon's own home for 30 minutes without being sent back. */
+    @JavascriptInterface
+    public void openAmazonHome() {
+        HomeWatchService.allowAmazonHome(act, 30);
+    }
+
     @JavascriptInterface
     public void openSettings() {
         Intent i = new Intent(Settings.ACTION_SETTINGS);

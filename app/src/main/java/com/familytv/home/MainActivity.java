@@ -94,6 +94,7 @@ public class MainActivity extends Activity {
         super.onResume();
         WakeService.inFront = true;
         WakeService.start(this);
+        HomeWatchService.clearAmazonHomeAllowance(this);
         boolean relock = screenWasOff
                 || (pausedAt > 0 && SystemClock.elapsedRealtime() - pausedAt > RELOCK_AFTER_MS);
         screenWasOff = false;

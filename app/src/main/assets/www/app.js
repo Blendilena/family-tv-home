@@ -397,7 +397,8 @@
   }
   function appsGrid(h, pkgs) {
     return '<section class="psec"><div class="psec-head"><h2>' + esc(h) + '</h2><span>' + pkgs.length + ' apps</span></div><div class="pgrid">' + pkgs.map(appTile).join('') + '</div></section>' +
-      '<section class="psec"><button class="pbtn" data-nav data-action="fire-settings">Open Fire TV settings</button></section>';
+      '<section class="psec"><div class="pbtns"><button class="pbtn" data-nav data-action="fire-settings">Open Fire TV settings</button>' +
+      '<button class="pbtn" data-nav data-action="amazon-home">Amazon home (30 min)</button></div></section>';
   }
   function enterParents() { S.tab = 'home'; S.userMoved = false; renderParents(); show('parents'); }
 
@@ -522,6 +523,7 @@
       C.parentsPin ? ['pin', 'Change parents PIN', ''] : null,
       ['refresh', 'Refresh movies and series', ''],
       ['fire-settings', 'Fire TV settings', ''],
+      ['amazon-home', 'Amazon home', 'for 30 minutes'],
       ['close', 'Close', '']
     ];
     $('set-list').innerHTML = items.filter(Boolean).map(function (i) { return '<button class="set-item" data-nav data-action="' + i[0] + '"><span>' + i[1] + '</span><span>' + i[2] + '</span></button>'; }).join('');
@@ -632,6 +634,7 @@
       case 'settings': return openSettings();
       case 'close': return closeOverlay();
       case 'fire-settings': return A.openSettings();
+      case 'amazon-home': if (A.openAmazonHome) A.openAmazonHome(); return;
       case 'refresh':
         try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('tmdb:') === 0) localStorage.removeItem(k); }); } catch (e) { }
         closeOverlay(true); renderParents(); toast('Refreshing…'); return;

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Family TV</string>
+    <string name="home_watch_name">Family TV home button</string>
+    <string name="home_watch_desc">Brings Family TV back when Home or Back would show Amazon\'s home screen. It only notices Amazon\'s home screen opening and never reads what is on screen.</string>
 </resources>
